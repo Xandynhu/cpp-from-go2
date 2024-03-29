@@ -1,9 +1,15 @@
-.PHONY: all
+.PHONY: clean
 
-all: main
+TARGET=cpp-from-go2
 
-bridge.so:
-	/usr/bin/clang++ -o libbridge.so *.cpp  -std=c++20 -O3 -Wall -Wextra -fPIC -shared
+$(TARGET): libstring_collector.a
+	go build .
 
-main: bridge.so
-	go build main.go
+libstring_collector.a: string_collector.o bridge.o
+	ar r $@ $^
+
+%.o: %.cpp
+	g++ -O2 -o $@ -c $^
+
+clean:
+	rm -f *.o *.so *.a $(TARGET)

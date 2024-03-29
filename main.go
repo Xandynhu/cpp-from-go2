@@ -1,44 +1,43 @@
 package main
 
-// #cgo LDFLAGS: -L. -lbridge
+// #cgo LDFLAGS: -L. -lstring_collector
 // #include "bridge.h"
 import "C"
 import "unsafe"
 
-type StringCollector struct {
+type GoStringCollector struct {
 	ptr unsafe.Pointer
 }
 
-func NewStringCollector() StringCollector {
-	return StringCollector{
-		ptr: C.NewStringCollector(),
-	}
+func New() GoStringCollector {
+	var ret GoStringCollector
+	ret.ptr = C.NewStringCollector()
+	return ret
 }
 
-func (sc StringCollector) DeleteStringCollector() {
+func (sc GoStringCollector) Free() {
 	C.DeleteStringCollector(sc.ptr)
 }
 
-func (sc StringCollector) AddString(s string) {
+func (sc GoStringCollector) Add(s string) {
 	cs := C.CString(s)
 	C.StringCollector_Add(sc.ptr, cs)
 	C.FreeString(cs)
 }
 
-func (sc StringCollector) StringCollector_Print() {
+func (sc GoStringCollector) Print() {
 	C.StringCollector_Print(sc.ptr)
 }
 
 func run() {
-	sc := NewStringCollector()
-	defer sc.DeleteStringCollector()
+	sc := New()
+	defer sc.Free()
 
-	sc.AddString("Hello")
-	sc.StringCollector_Print()
+	sc.Add("Hello")
+	sc.Print()
 
-	sc.AddString("World")
-	sc.StringCollector_Print()
-
+	sc.Add("World")
+	sc.Print()
 }
 
 func main() {
