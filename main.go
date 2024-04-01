@@ -1,9 +1,12 @@
 package main
 
-// #cgo LDFLAGS: -L. -lstring_collector
-// #include "bridge.h"
+// #cgo LDFLAGS: -L./build/ -lstring_collector_static
+// #include "bridge.hpp"
 import "C"
-import "unsafe"
+import (
+	"fmt"
+	"unsafe"
+)
 
 type GoStringCollector struct {
 	ptr unsafe.Pointer
@@ -29,6 +32,12 @@ func (sc GoStringCollector) Print() {
 	C.StringCollector_Print(sc.ptr)
 }
 
+func (sc GoStringCollector) Get() string {
+	cs := C.StringCollector_Get(sc.ptr)
+	defer C.FreeString(cs)
+	return C.GoString(cs)
+}
+
 func run() {
 	sc := New()
 	defer sc.Free()
@@ -38,11 +47,13 @@ func run() {
 
 	sc.Add("World")
 	sc.Print()
+
+	sc.Add("!")
+	var s string
+	s = sc.Get()
+	fmt.Printf("Got: %s\n", s)
 }
 
 func main() {
-	iterations := 1000000
-	for i := 0; i < iterations; i++ {
-		run()
-	}
+	run()
 }

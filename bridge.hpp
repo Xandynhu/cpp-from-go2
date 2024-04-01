@@ -9,6 +9,7 @@ extern "C" {
 
     void   StringCollector_Add(void* sc, const char* str);
     void   StringCollector_Print(void* sc);
+    const char*  StringCollector_Get(void* sc);
 
     void   FreeString(char* str);
 
